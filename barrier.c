@@ -56,7 +56,10 @@ void barrier_enter(barrier_t *barrier) {
     if (my_value == barrier->count) {
         pthread_mutex_lock(&(barrier->mutex));
         barrier->exited = 0;
-        pthread_cond_broadcast(&(barrier->full_cond));
+        // only wake up at most barrier->count waiting threads
+        for (int i = 0; i < barrier->count; ++i)
+            pthread_cond_signal(&(barrier->full_cond));
+            
         pthread_mutex_unlock(&(barrier->mutex));
     }
 }
